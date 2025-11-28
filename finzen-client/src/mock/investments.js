@@ -1,0 +1,80 @@
+export const mockInvestments = [
+  {
+    "id": "inv1",
+    "instrument_name": "Axis Bluechip Fund",
+    "investment_type": "mutual_fund",
+    "amount_invested": 2100,
+    "current_value": 2205,
+    "quantity": 100,
+    "entry_price": 21.00,
+    "current_price": 22.05,
+    "investment_date": "2025-11-20T10:00:00Z",
+    "source": "round_up",
+    "returns_percentage": 5.0
+  },
+  {
+    "id": "inv2",
+    "instrument_name": "Nifty 50 ETF",
+    "investment_type": "etf",
+    "amount_invested": 1050,
+    "current_value": 1095,
+    "quantity": 30,
+    "entry_price": 35.00,
+    "current_price": 36.50,
+    "investment_date": "2025-11-22T10:00:00Z",
+    "source": "round_up",
+    "returns_percentage": 4.3
+  },
+  {
+    "id": "inv3",
+    "instrument_name": "HDFC Equity Fund",
+    "investment_type": "mutual_fund",
+    "amount_invested": 5000,
+    "current_value": 5350,
+    "quantity": 125,
+    "entry_price": 40.00,
+    "current_price": 42.80,
+    "investment_date": "2025-11-15T10:00:00Z",
+    "source": "manual",
+    "returns_percentage": 7.0
+  },
+  {
+    "id": "inv4",
+    "instrument_name": "Government Securities",
+    "investment_type": "bonds",
+    "amount_invested": 3000,
+    "current_value": 3090,
+    "quantity": 300,
+    "entry_price": 10.00,
+    "current_price": 10.30,
+    "investment_date": "2025-11-10T10:00:00Z",
+    "source": "goal_contribution",
+    "returns_percentage": 3.0
+  },
+  {
+    "id": "inv5",
+    "instrument_name": "SBI Small Cap Fund",
+    "investment_type": "mutual_fund",
+    "amount_invested": 1500,
+    "current_value": 1425,
+    "quantity": 50,
+    "entry_price": 30.00,
+    "current_price": 28.50,
+    "investment_date": "2025-11-25T10:00:00Z",
+    "source": "round_up",
+    "returns_percentage": -5.0
+  },
+  {
+    "id": "inv6",
+    "instrument_name": "Gold ETF",
+    "investment_type": "etf",
+    "amount_invested": 2400,
+    "current_value": 2520,
+    "quantity": 40,
+    "entry_price": 60.00,
+    "current_price": 63.00,
+    "investment_date": "2025-11-18T10:00:00Z",
+    "source": "manual",
+    "returns_percentage": 5.0
+  }
+];
