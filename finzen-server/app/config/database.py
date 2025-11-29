@@ -2,35 +2,46 @@ import motor.motor_asyncio
 from app.config.settings import settings
 from typing import Optional
 from fastapi import HTTPException
+import asyncio
 
 # Global database client
 client: Optional[motor.motor_asyncio.AsyncIOMotorClient] = None
 db: Optional[motor.motor_asyncio.AsyncIOMotorDatabase] = None
 
 async def connect_to_mongo():
-    """Connect to MongoDB on app startup"""
+    """Connect to MongoDB Atlas on app startup"""
     global client, db
+    
     try:
-        # FIX: Don't require successful ping; DB connection issues should not prevent startup.
-        # Routes will return 503 if DB is unavailable.
-        client = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGODB_URI)
+        print(f"[INFO] Connecting to MongoDB Atlas...")
+        print(f"       URI: {settings.MONGODB_URI[:60]}...")
+        
+        # Initialize MongoDB client for Atlas
+        client = motor.motor_asyncio.AsyncIOMotorClient(
+            settings.MONGODB_URI,
+            serverSelectionTimeoutMS=10000,
+            connectTimeoutMS=20000,
+            socketTimeoutMS=20000,
+            retryWrites=True,
+            w='majority'
+        )
         db = client[settings.DATABASE_NAME]
         
-        # Test connection (non-blocking attempt)
-        try:
-            await client.admin.command('ping')
-            print("[OK] Connected to MongoDB successfully!")
-            print(f"     Database: {settings.DATABASE_NAME}")
-            print(f"     URI: {settings.MONGODB_URI[:50]}...")
-            return True
-        except Exception as ping_error:
-            print(f"[WARN] MongoDB connection check failed: {ping_error}")
-            print("       App will continue, but routes requiring DB will return 503.")
-            return False
+        # Test connection
+        await client.admin.command('ping')
+        print("[OK] ✅ Connected to MongoDB Atlas successfully!")
+        print(f"     Database: {settings.DATABASE_NAME}")
+        
+        # List collections
+        collections = await db.list_collection_names()
+        print(f"     Collections: {collections if collections else 'No collections yet'}")
+        return True
             
     except Exception as e:
-        print(f"[ERROR] Failed to initialize MongoDB client: {e}")
-        print("        App will continue; routes requiring DB will return 503.")
+        print(f"[ERROR] ❌ MongoDB connection failed: {e}")
+        # Still set db for lazy connection
+        if client:
+            db = client[settings.DATABASE_NAME]
         return False
 
 async def close_mongo_connection():
@@ -41,10 +52,30 @@ async def close_mongo_connection():
         print("[OK] Closed MongoDB connection")
 
 def get_database():
-    """Get database instance (dependency injection)"""
-    if db is None:
+    """Get database instance - ALWAYS returns a valid database object"""
+    global client, db
+    
+    # If db exists, return it
+    if db is not None:
+        return db
+    
+    # Otherwise, initialize it now
+    print("[INFO] Initializing database connection on demand...")
+    try:
+        client = motor.motor_asyncio.AsyncIOMotorClient(
+            settings.MONGODB_URI,
+            serverSelectionTimeoutMS=10000,
+            connectTimeoutMS=20000,
+            socketTimeoutMS=20000,
+            retryWrites=True,
+            w='majority'
+        )
+        db = client[settings.DATABASE_NAME]
+        print("[OK] ✅ Database initialized successfully")
+        return db
+    except Exception as e:
+        print(f"[ERROR] ❌ Database initialization failed: {e}")
         raise HTTPException(
             status_code=503, 
-            detail="Database not initialized. Please ensure MongoDB is running on localhost:27017 or update MONGODB_URI in .env file."
+            detail=f"Cannot connect to MongoDB Atlas. Error: {str(e)}"
         )
-    return db

@@ -43,7 +43,7 @@ class AIRecommendationService:
         
         recommendation.update({
             "user_id": user_id,
-            "generated_at": datetime.utcnow(),
+            "generated_at": datetime.utcnow().isoformat(),
             "confidence_score": 0.85
         })
         
@@ -53,11 +53,18 @@ class AIRecommendationService:
     async def cache_recommendation(user_id: str, recommendation: dict):
         """Cache recommendation in database"""
         db = get_database()
-        recommendation["user_id"] = ObjectId(user_id)
+        
+        # Create a copy to avoid modifying the original
+        cache_data = recommendation.copy()
+        cache_data["user_id"] = ObjectId(user_id)
+        
+        # Convert generated_at to datetime if it's a string
+        if isinstance(cache_data.get("generated_at"), str):
+            cache_data["generated_at"] = datetime.fromisoformat(cache_data["generated_at"])
         
         await db.ai_recommendations.replace_one(
             {"user_id": ObjectId(user_id)},
-            recommendation,
+            cache_data,
             upsert=True
         )
     

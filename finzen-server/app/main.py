@@ -72,11 +72,41 @@ async def root():
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
+    from app.config.database import db, get_database
+    
+    db_status = "CONNECTED" if db is not None else "DISCONNECTED"
+    
+    # Try to ping database
+    if db is not None:
+        try:
+            await db.command('ping')
+            db_status = "CONNECTED"
+        except:
+            db_status = "ERROR"
+    
     return {
         "status": "HEALTHY",
         "service": "FinZen Backend",
         "environment": settings.ENVIRONMENT,
+        "database": db_status,
+        "db_object": str(type(db)),
         "timestamp": str(__import__('datetime').datetime.utcnow())
+    }
+
+@app.get("/debug/db")
+async def debug_db():
+    """Debug database connection"""
+    from app.config.database import db, client, get_database
+    import inspect
+    
+    # Get the source of get_database function
+    source = inspect.getsource(get_database)
+    
+    return {
+        "db_is_none": db is None,
+        "client_is_none": client is None,
+        "db_type": str(type(db)),
+        "get_database_source": source[:500]
     }
 
 # Include all routers
@@ -95,3 +125,4 @@ if __name__ == "__main__":
         port=settings.PORT,
         reload=True if settings.ENVIRONMENT == "development" else False
     )
+ 

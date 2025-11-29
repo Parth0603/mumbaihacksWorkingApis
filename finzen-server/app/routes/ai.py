@@ -31,6 +31,9 @@ async def get_recommendations(user_id: str = Depends(get_current_user)):
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"[ERROR] AI Recommendations failed: {error_details}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error generating recommendations: {str(e)}"
