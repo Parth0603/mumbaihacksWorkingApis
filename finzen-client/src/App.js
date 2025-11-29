@@ -1,32 +1,18 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Layout from './components/Layout/Layout';
-import Home from './pages/Home';
-import Dashboard from './pages/Dashboard';
-import Portfolio from './pages/Portfolio';
-import Education from './pages/Education';
-import Gamification from './pages/Gamification';
-import { AuthProvider } from './hooks/useAuth';
-import ErrorBoundary from './components/common/ErrorBoundary';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './pages/Auth/Login';
+import Signup from './pages/Auth/Signup';
 import './App.css';
 
 function App() {
   return (
-    <ErrorBoundary>
-      <AuthProvider>
-        <Router>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/" element={<Layout />}>
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="portfolio" element={<Portfolio />} />
-              <Route path="education" element={<Education />} />
-              <Route path="gamification" element={<Gamification />} />
-            </Route>
-          </Routes>
-        </Router>
-      </AuthProvider>
-    </ErrorBoundary>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+      </Routes>
+    </Router>
   );
 }
 

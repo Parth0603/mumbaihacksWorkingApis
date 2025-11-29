@@ -1,79 +1,229 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import apiClient from '../utils/api';
+import './Education.css';
 
-const Education = () => {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>Education Modules</h1>
-      
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
-        <div style={{
-          backgroundColor: 'white',
-          padding: '24px',
-          borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          border: '2px solid #10b981'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
-            <div>
-              <h4 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>Stock Market 101</h4>
-              <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '12px' }}>Learn the basics of stock market investing</p>
-              <div style={{ display: 'flex', gap: '16px', fontSize: '12px', color: '#9ca3af' }}>
-                <span>Beginner</span>
-                <span>2 min</span>
-              </div>
-            </div>
-            <span style={{ fontSize: '24px' }}>✅</span>
-          </div>
-          <div style={{ marginBottom: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '4px' }}>
-              <span>Progress</span>
-              <span>100%</span>
-            </div>
-            <div style={{ width: '100%', backgroundColor: '#e5e7eb', borderRadius: '4px', height: '8px' }}>
-              <div style={{ width: '100%', backgroundColor: '#10b981', height: '8px', borderRadius: '4px' }}></div>
-            </div>
-          </div>
-          <button style={{
-            backgroundColor: '#6b7280',
-            color: 'white',
-            padding: '8px 16px',
-            borderRadius: '4px',
-            border: 'none',
-            width: '100%',
-            cursor: 'pointer'
-          }}>Completed</button>
-        </div>
-        
-        <div style={{
-          backgroundColor: 'white',
-          padding: '24px',
-          borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
-            <div>
-              <h4 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>Mutual Funds Explained</h4>
-              <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '12px' }}>Understanding mutual funds and their benefits</p>
-              <div style={{ display: 'flex', gap: '16px', fontSize: '12px', color: '#9ca3af' }}>
-                <span>Beginner</span>
-                <span>2.5 min</span>
-              </div>
-            </div>
-            <span style={{ fontSize: '24px' }}>📚</span>
-          </div>
-          <button style={{
-            backgroundColor: '#2563eb',
-            color: 'white',
-            padding: '8px 16px',
-            borderRadius: '4px',
-            border: 'none',
-            width: '100%',
-            cursor: 'pointer'
-          }}>Start Learning</button>
-        </div>
+export default function Education() {
+  const [modules, setModules] = useState([]);
+  const [selectedModule, setSelectedModule] = useState(null);
+  const [quiz, setQuiz] = useState(null);
+  const [answers, setAnswers] = useState({});
+  const [quizResult, setQuizResult] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [view, setView] = useState('list'); // 'list', 'detail', 'quiz', 'result'
+
+  useEffect(() => {
+    fetchModules();
+  }, []);
+
+  const fetchModules = async () => {
+    try {
+      const response = await apiClient.get('/education/modules');
+      setModules(response.data.modules);
+    } catch (error) {
+      console.error('Error fetching modules:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleModuleClick = async (moduleId) => {
+    try {
+      const response = await apiClient.get(`/education/modules/${moduleId}`);
+      setSelectedModule(response.data);
+      setView('detail');
+    } catch (error) {
+      console.error('Error fetching module:', error);
+    }
+  };
+
+  const handleStartModule = async () => {
+    try {
+      await apiClient.post(`/education/modules/${selectedModule._id}/start`);
+      // Load quiz
+      const quizResponse = await apiClient.get(`/education/modules/${selectedModule._id}/quiz`);
+      setQuiz(quizResponse.data);
+      setAnswers({});
+      setView('quiz');
+    } catch (error) {
+      console.error('Error starting module:', error);
+    }
+  };
+
+  const handleAnswerChange = (questionIndex, answer) => {
+    setAnswers({
+      ...answers,
+      [questionIndex]: answer,
+    });
+  };
+
+  const handleSubmitQuiz = async () => {
+    try {
+      const response = await apiClient.post(`/education/modules/${selectedModule._id}/quiz`, answers);
+      setQuizResult(response.data);
+      setView('result');
+    } catch (error) {
+      console.error('Error submitting quiz:', error);
+      alert('Error submitting quiz. Please try again.');
+    }
+  };
+
+  const handleBackToList = () => {
+    setView('list');
+    setSelectedModule(null);
+    setQuiz(null);
+    setQuizResult(null);
+    fetchModules(); // Refresh to show updated progress
+  };
+
+  if (loading) {
+    return (
+      <div className="education-container">
+        <div className="loading">Loading modules...</div>
       </div>
+    );
+  }
+
+  return (
+    <div className="education-container">
+      {view === 'list' && (
+        <>
+          <div className="education-header">
+            <h1>📚 Learn to Invest</h1>
+            <p className="subtitle">Master investing basics with interactive modules and quizzes</p>
+          </div>
+
+          <div className="modules-grid">
+            {modules.map((module) => (
+              <div key={module._id} className="module-card" onClick={() => handleModuleClick(module._id)}>
+                <div className="module-header">
+                  <h3>{module.title}</h3>
+                  <span className={`difficulty ${module.difficulty}`}>{module.difficulty}</span>
+                </div>
+                <p className="module-description">{module.description}</p>
+                <div className="module-meta">
+                  <span>⏱️ {module.duration_minutes} min</span>
+                  <span>📖 {module.learning_outcomes?.length || 0} lessons</span>
+                </div>
+                {module.completed && (
+                  <div className="completed-badge">✅ Completed</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {view === 'detail' && selectedModule && (
+        <div className="module-detail">
+          <button className="btn-back" onClick={handleBackToList}>
+            ← Back to Modules
+          </button>
+          
+          <div className="detail-header">
+            <h1>{selectedModule.title}</h1>
+            <span className={`difficulty ${selectedModule.difficulty}`}>
+              {selectedModule.difficulty}
+            </span>
+          </div>
+
+          <div className="detail-content">
+            <div className="content-section">
+              <h3>What you'll learn:</h3>
+              <ul className="learning-outcomes">
+                {selectedModule.learning_outcomes?.map((outcome, index) => (
+                  <li key={index}>✓ {outcome}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="content-section">
+              <h3>Module Content:</h3>
+              <div className="module-content" dangerouslySetInnerHTML={{ __html: selectedModule.content }} />
+            </div>
+          </div>
+
+          <button className="btn-start-quiz" onClick={handleStartModule}>
+            Start Quiz 🎯
+          </button>
+        </div>
+      )}
+
+      {view === 'quiz' && quiz && (
+        <div className="quiz-container">
+          <button className="btn-back" onClick={handleBackToList}>
+            ← Back to Modules
+          </button>
+
+          <div className="quiz-header">
+            <h1>📝 Quiz Time!</h1>
+            <p>Answer all questions to complete the module</p>
+          </div>
+
+          <div className="questions-list">
+            {quiz.questions.map((question, index) => (
+              <div key={index} className="question-card">
+                <h3>Question {index + 1}</h3>
+                <p className="question-text">{question.question}</p>
+                <div className="options-list">
+                  {question.options.map((option, optIndex) => (
+                    <label key={optIndex} className="option-label">
+                      <input
+                        type="radio"
+                        name={`question-${index}`}
+                        value={option}
+                        checked={answers[index] === option}
+                        onChange={() => handleAnswerChange(index, option)}
+                      />
+                      <span>{option}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button
+            className="btn-submit-quiz"
+            onClick={handleSubmitQuiz}
+            disabled={Object.keys(answers).length !== quiz.questions.length}
+          >
+            Submit Quiz
+          </button>
+        </div>
+      )}
+
+      {view === 'result' && quizResult && (
+        <div className="result-container">
+          <div className={`result-card ${quizResult.passed ? 'passed' : 'failed'}`}>
+            <div className="result-icon">
+              {quizResult.passed ? '🎉' : '😔'}
+            </div>
+            <h1>{quizResult.passed ? 'Congratulations!' : 'Keep Learning!'}</h1>
+            <p className="result-message">{quizResult.message}</p>
+            
+            <div className="result-stats">
+              <div className="stat">
+                <span className="stat-label">Score</span>
+                <span className="stat-value">{quizResult.score}%</span>
+              </div>
+              <div className="stat">
+                <span className="stat-label">Correct</span>
+                <span className="stat-value">{quizResult.correct}/{quizResult.total}</span>
+              </div>
+            </div>
+
+            {quizResult.passed && (
+              <div className="points-earned">
+                +50 Points Earned! 🏆
+              </div>
+            )}
+
+            <button className="btn-back-list" onClick={handleBackToList}>
+              Back to Modules
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
-
-export default Education;
+}

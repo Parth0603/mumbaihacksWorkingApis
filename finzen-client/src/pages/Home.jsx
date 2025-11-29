@@ -31,21 +31,39 @@ const Home = () => {
             Round up your daily spending and invest the spare change automatically. 
             Build wealth while you spend with AI-powered recommendations.
           </p>
-          <Link
-            to="/dashboard"
-            style={{
-              backgroundColor: '#2563eb',
-              color: 'white',
-              padding: '16px 32px',
-              borderRadius: '8px',
-              fontSize: '18px',
-              fontWeight: '600',
-              textDecoration: 'none',
-              display: 'inline-block'
-            }}
-          >
-            Start Investing Today
-          </Link>
+          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+            <Link
+              to="/signup"
+              style={{
+                backgroundColor: '#2563eb',
+                color: 'white',
+                padding: '16px 32px',
+                borderRadius: '8px',
+                fontSize: '18px',
+                fontWeight: '600',
+                textDecoration: 'none',
+                display: 'inline-block'
+              }}
+            >
+              Start Investing Today
+            </Link>
+            <Link
+              to="/login"
+              style={{
+                backgroundColor: 'white',
+                color: '#2563eb',
+                padding: '16px 32px',
+                borderRadius: '8px',
+                fontSize: '18px',
+                fontWeight: '600',
+                textDecoration: 'none',
+                display: 'inline-block',
+                border: '2px solid #2563eb'
+              }}
+            >
+              Login
+            </Link>
+          </div>
         </div>
       </section>
     </div>
