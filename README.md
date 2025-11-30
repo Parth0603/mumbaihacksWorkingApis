@@ -1,6 +1,6 @@
 # FinZen - Smart Investment Platform
 
-A modern fintech application that helps users invest spare change from daily transactions through automated round-up features, AI-powered recommendations, and gamified financial education.
+A modern fintech application that helps users invest spare change from daily transactions through automated round-up features, AI-powered recommendations, and financial education.
 
 ## 🚀 Features
 
