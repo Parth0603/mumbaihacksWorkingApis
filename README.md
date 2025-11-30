@@ -28,6 +28,9 @@ A modern fintech application that helps users invest spare change from daily tra
 - **MongoDB** - NoSQL database
 - **JWT Authentication** - Secure token-based auth
 - **Pydantic** - Data validation
+  ![Alt Text](./TLTRRzis57xNh-1IO6k1f2dMBYi6T83ioAvHn_Oifrct3W4jqpORcHH8sgapxB_l8tMZ92TvY7DkFDVl7FzWjcp7I9PIBWBzm4L65TsH9KqUDahknQelKwd8Yq5aVtq9gLPC5TotxiVZKgNautFCjHIcoGi2mqtAo82BlvWW5oG-QiDs95J9bXkMcBrY4Fg9VFZmWOJznN.png)
+
+  
 
 ## 📁 Project Structure
 
